@@ -1,12 +1,12 @@
 package com.plarium.logreader.services;
 
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.plarium.logreader.processing.Chain;
 import com.plarium.logreader.processing.JsonValidationProcess;
 import com.plarium.logreader.processing.SendingProcess;
 
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +39,9 @@ public class TransformService implements Runnable {
             Path path = newFilesQueue.poll();
             if (path != null) {
                 System.out.println("THREAD IS " + Thread.currentThread());
-                try (FileInputStream fileInputStream = new FileInputStream(path.toString()); Scanner scanner = new Scanner(fileInputStream)) {
+                try {
+                    FileInputStream fileInputStream = new FileInputStream(path.toString());
+                    Scanner scanner = new Scanner(fileInputStream);
                     int linesCounter = 0;
                     List<String> batch = new ArrayList<>();
                     boolean processResult = true;
@@ -60,6 +62,8 @@ public class TransformService implements Runnable {
                         newFilesQueue.put(path);
                         continue;
                     }
+                    fileInputStream.close();
+                    scanner.close();
                     removeTransformedFile(path);
                 } catch (IOException | InterruptedException e) {
                     logger.severe(String.format("error occurred while sending file: %s with message: %s", path.toString(), e.getMessage()));
@@ -74,11 +78,11 @@ public class TransformService implements Runnable {
      * @param path path of file to be deleted after processed
      */
     private void removeTransformedFile(Path path) {
-        File file = new File(path.toUri());
-        if (file.delete()) {
+        try {
+            Files.delete(path);
             logger.info(String.format("File %s deleted successfully", path.toString()));
-        } else {
-            logger.severe(String.format("Failed to delete the file: %s", path.toString()));
+        } catch (IOException e) {
+            logger.severe(String.format("Failed to delete the file: %s with error; %s", path.toString(), e.getMessage()));
         }
     }
 
@@ -92,9 +96,13 @@ public class TransformService implements Runnable {
      * @return result of processing a batch
      */
     private boolean process(List<String> batch, Path path, String apiUrl, int linesCounter) {
-        JsonValidationProcess jsonValidationProcess = new JsonValidationProcess(path, linesCounter);
-        SendingProcess sendingProcess = new SendingProcess(apiUrl);
-        ArrayNode validatedLines = jsonValidationProcess.process(batch);
-        return sendingProcess.process(validatedLines);
+        try {
+            return (Boolean) Chain.createStart(new JsonValidationProcess(path, linesCounter))
+                    .append(new SendingProcess(apiUrl))
+                    .start(batch);
+        } catch (Exception e) {
+            return false;
+        }
+
     }
 }

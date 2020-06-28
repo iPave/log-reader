@@ -27,7 +27,7 @@ public class SendingProcess implements Process<ArrayNode, Boolean> {
             URL url = new URL(apiUrl);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
             connection.setRequestMethod("POST");
-            connection.setRequestProperty("Content-Type", "application/json; utf-8");
+            connection.setRequestProperty("Content-Type", "application/json");
             connection.setRequestProperty("Accept", "application/json");
             connection.setDoOutput(true);
             try (OutputStream outputStream = connection.getOutputStream()) {

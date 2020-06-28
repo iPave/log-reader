@@ -36,10 +36,11 @@ public class StorageLogDaoImpl implements LogDao {
         String fileName = MessageFormat.format(filepath, logType, simpleDateFormat.format(new Date()), idempotencyKey);
         Path directoryPath = Paths.get(fileDirName);
         Path logFilePath = Paths.get(fileName);
+        //if file already exist we dont need to process it again
         if (Files.exists(logFilePath)) {
             return;
         }
-        if (Files.exists(directoryPath)) {
+        if (!Files.exists(directoryPath)) {
             Files.createDirectories(directoryPath);
         }
         Files.createFile(logFilePath);
@@ -49,6 +50,5 @@ public class StorageLogDaoImpl implements LogDao {
         }
         out.close();
         logger.severe(String.format("Batch Log saved to file : %s ", fileName));
-
     }
 }
