@@ -2,6 +2,7 @@ package com.plarium.logreader.services;
 
 import java.io.IOException;
 import java.nio.file.*;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.concurrent.BlockingDeque;
 import java.util.logging.Logger;
 
@@ -25,7 +26,7 @@ public class FileWatcherService implements Runnable {
     public void run() {
         try {
             WatchService watchService = FileSystems.getDefault().newWatchService();
-            path.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
+            registerRecursive(path, watchService);
             WatchKey key;
             while ((key = watchService.take()) != null) {
                 for (WatchEvent<?> event : key.pollEvents()) {
@@ -35,7 +36,24 @@ public class FileWatcherService implements Runnable {
                 key.reset();
             }
         } catch (IOException | InterruptedException e) {
-            System.out.println(e);
+            logger.severe(String.format("Exception occurred while watching directory: %s", e.getMessage()));
         }
+    }
+
+    /**
+     * Registers all subfolders of root for watch service
+     *
+     * @param root         the root directory path
+     * @param watchService WatchService
+     * @throws IOException if IO problems occur
+     */
+    private void registerRecursive(final Path root, WatchService watchService) throws IOException {
+        Files.walkFileTree(root, new SimpleFileVisitor<Path>() {
+            @Override
+            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+                dir.register(watchService, StandardWatchEventKinds.ENTRY_CREATE);
+                return FileVisitResult.CONTINUE;
+            }
+        });
     }
 }

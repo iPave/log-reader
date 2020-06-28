@@ -29,11 +29,11 @@ public class StorageLogDaoImpl implements LogDao {
     public void save(String logType, ArrayNode logs) throws IOException {
         //not the best idea to save to root home directory, maybe its better to create special user for the execution of service
         String userDir = System.getProperty("user.home");
-        String idempotenceKey = DigestUtils.sha1Hex(logType + logs.toString());
+        String idempotencyKey = DigestUtils.sha1Hex(logType + logs.toString());
         String logDir = userDir + DATA_DIR;
         String filepath = userDir + FILE_PATH;
         String fileDirName = MessageFormat.format(logDir, logType, simpleDateFormat.format(new Date()));
-        String fileName = MessageFormat.format(filepath, logType, simpleDateFormat.format(new Date()), idempotenceKey);
+        String fileName = MessageFormat.format(filepath, logType, simpleDateFormat.format(new Date()), idempotencyKey);
         Path directoryPath = Paths.get(fileDirName);
         Path logFilePath = Paths.get(fileName);
         if (Files.exists(logFilePath)) {

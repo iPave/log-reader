@@ -24,11 +24,18 @@ public class EnvUtils {
     }
 
     public static String getRequiredEnvString(final Map<String, ?> env, final String propertyName) throws ConfigurationException {
-        final Object obj = env.get(propertyName);
-        if (obj == null) {
+        final Object property = env.get(propertyName);
+        if (property == null) {
             throw new ConfigurationException(String.format("Property: %s, is not allowed to be empty", propertyName));
         }
-        return obj.toString().trim();
+        return property.toString().trim();
     }
 
+    public static boolean getEnvBool(Map<String, ?> env, final String propertyName, boolean defaultValue) {
+        final Object property = env.get(propertyName);
+        if (property == null) {
+            return defaultValue;
+        }
+        return Boolean.parseBoolean(property.toString());
+    }
 }

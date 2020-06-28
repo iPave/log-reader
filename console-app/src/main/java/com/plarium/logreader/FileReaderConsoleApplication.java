@@ -2,6 +2,7 @@ package com.plarium.logreader;
 
 
 import com.plarium.logreader.services.FileWatcherService;
+import com.plarium.logreader.services.InitialFilesParsingService;
 import com.plarium.logreader.services.TransformService;
 import com.plarium.logreader.utils.EnvUtils;
 
@@ -19,6 +20,7 @@ public class FileReaderConsoleApplication {
         String apiUrl = EnvUtils.getRequiredEnvString(System.getenv(), "API_URI");
         int batchSize = EnvUtils.getEnvInt(System.getenv(), "BATCH_SIZE", 100);
         int nThreads = EnvUtils.getEnvInt(System.getenv(), "N_THREADS", 10);
+        boolean readExistingFiels = EnvUtils.getEnvBool(System.getenv(), "READ_EXISTING_FILES", false);
         BlockingDeque<Path> newFilesQueue = new LinkedBlockingDeque<>();
         FileWatcherService fileWatcherService = new FileWatcherService(path, newFilesQueue);
         ExecutorService executorService = Executors.newSingleThreadExecutor();
@@ -27,6 +29,8 @@ public class FileReaderConsoleApplication {
         for (int i = 0; i < nThreads; i++) {
             transformExecutorService.execute(new TransformService(newFilesQueue, apiUrl, batchSize));
         }
-        //todo initial process to send already existing files to queue
+        if (readExistingFiels) {
+            new InitialFilesParsingService(path, newFilesQueue).parse();
+        }
     }
 }
