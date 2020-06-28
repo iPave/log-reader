@@ -3,7 +3,6 @@ package com.plarium.logreader.services;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.plarium.logreader.processing.JsonValidationProcess;
 import com.plarium.logreader.processing.SendingProcess;
-import com.plarium.logreader.processing.TypeGroupingProcess;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -11,7 +10,6 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.Scanner;
 import java.util.concurrent.BlockingDeque;
 import java.util.logging.Logger;
@@ -40,12 +38,13 @@ public class TransformService implements Runnable {
         while (true) {
             Path path = newFilesQueue.poll();
             if (path != null) {
+                System.out.println("THREAD IS " + Thread.currentThread());
                 try (FileInputStream fileInputStream = new FileInputStream(path.toString()); Scanner scanner = new Scanner(fileInputStream)) {
                     int linesCounter = 0;
                     List<String> batch = new ArrayList<>();
                     boolean processResult = true;
                     while (scanner.hasNextLine()) {
-                        if (linesCounter % batchSize == 0) {
+                        if (linesCounter != 0 & linesCounter % batchSize == 0) {
                             processResult &= process(batch, path, apiUrl, linesCounter);
                             batch.clear();
                         }
@@ -94,10 +93,8 @@ public class TransformService implements Runnable {
      */
     private boolean process(List<String> batch, Path path, String apiUrl, int linesCounter) {
         JsonValidationProcess jsonValidationProcess = new JsonValidationProcess(path, linesCounter);
-        TypeGroupingProcess typeGroupingProcess = new TypeGroupingProcess();
         SendingProcess sendingProcess = new SendingProcess(apiUrl);
         ArrayNode validatedLines = jsonValidationProcess.process(batch);
-        Map<String, ArrayNode> groupedLines = typeGroupingProcess.process(validatedLines);
-        return sendingProcess.process(groupedLines);
+        return sendingProcess.process(validatedLines);
     }
 }
