@@ -13,7 +13,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.constraints.NotEmpty;
-import java.io.IOException;
 
 @RestController
 @RequestMapping("/save")
@@ -22,7 +21,7 @@ public class SaveController {
 
     @PostMapping
     @ApiOperation(value = "Starts a process for saving batch of logs", response = ResponseEntity.class)
-    public ResponseEntity saveBatch(@RequestBody @NotEmpty ArrayNode logBatch) throws IOException {
+    public ResponseEntity saveBatch(@RequestBody @NotEmpty ArrayNode logBatch) throws Exception {
         StorageLogDaoImpl storageLogDao = new StorageLogDaoImpl();
         LogProcessingService logProcessingService = new LogProcessingService(storageLogDao);
         logProcessingService.run(logBatch);
