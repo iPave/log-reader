@@ -6,6 +6,8 @@ RUN groupadd -r api && \
     useradd -r -g  api api && \
     chmod +x /web-api/start.sh && \
     chown -R api:api /web-api
-USER api
 WORKDIR /home/api
+RUN chown -R api:api  /home/api
+USER api
+
 ENTRYPOINT /web-api/start.sh

@@ -16,7 +16,7 @@ services:
     ports:
       - "8080:8080"
     volumes:
-      - ./output_dir:/api
+      - ./output_dir:/home/api
     networks:
       - code-network
 
