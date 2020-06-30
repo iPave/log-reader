@@ -35,8 +35,11 @@ public class FileWatcherService implements Runnable {
                 }
                 key.reset();
             }
-        } catch (IOException | InterruptedException e) {
+        } catch (IOException e) {
             logger.severe(String.format("Exception occurred while watching directory: %s", e.getMessage()));
+        } catch (InterruptedException e) {
+            logger.severe(String.format("Exception occurred, thread was interrupted with message: %s", e.getMessage()));
+            Thread.currentThread().interrupt();
         }
     }
 

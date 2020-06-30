@@ -65,8 +65,11 @@ public class TransformService implements Runnable {
                     fileInputStream.close();
                     scanner.close();
                     removeTransformedFile(path);
-                } catch (IOException | InterruptedException e) {
+                } catch (IOException e) {
                     logger.severe(String.format("error occurred while sending file: %s with message: %s", path.toString(), e.getMessage()));
+                } catch (InterruptedException e) {
+                    logger.severe(String.format("Exception occurred, thread was interrupted with message: %s", e.getMessage()));
+                    Thread.currentThread().interrupt();
                 }
             }
         }

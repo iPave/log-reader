@@ -26,7 +26,8 @@ public class InitialFilesParsingService {
         try {
             searchForFiles(path.toFile(), newFilesQueue);
         } catch (InterruptedException e) {
-            logger.severe(String.format("Exception occurred while parsing directory: %s", e.getMessage()));
+            logger.severe(String.format("Exception occurred while parsing directory thread was interrupted with message: %s", e.getMessage()));
+            Thread.currentThread().interrupt();
         }
     }
 

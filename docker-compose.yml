@@ -1,0 +1,25 @@
+version: "3.7"
+
+services:
+
+  console:
+    build: ./console-app
+    volumes:
+      - ./observed_dir:/observed_dir
+    env_file:
+      - conosole.env
+    networks:
+      - code-network
+
+  api:
+    build: ./web-api
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./output_dir:/api
+    networks:
+      - code-network
+
+networks:
+  code-network:
+    driver: bridge
