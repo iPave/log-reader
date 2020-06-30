@@ -30,6 +30,7 @@ public class JsonValidationProcess implements Process<List<String>, ArrayNode> {
     @Override
     public ArrayNode process(List<String> input) {
         ArrayNode validatedLines = mapper.createArrayNode();
+        //todo pass emtpy rows and normal line exception
         int rowNumber = 1;
         for (String line : input) {
             try {
