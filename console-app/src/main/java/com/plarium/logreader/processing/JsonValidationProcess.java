@@ -30,8 +30,9 @@ public class JsonValidationProcess implements Process<List<String>, ArrayNode> {
     @Override
     public ArrayNode process(List<String> input) {
         ArrayNode validatedLines = mapper.createArrayNode();
-        int currentLinePosition = startLinePosition;
+        int currentLinePosition = startLinePosition - 1;
         for (String line : input) {
+            currentLinePosition++;
             try {
                 if (line.isEmpty()) continue;
                 JsonNode jsonObjectLine = mapper.readTree(line);
@@ -41,7 +42,6 @@ public class JsonValidationProcess implements Process<List<String>, ArrayNode> {
                     continue;
                 }
                 validatedLines.add(jsonObjectLine);
-                currentLinePosition++;
             } catch (JsonProcessingException e) {
                 logger.severe(String.format("Invalid json object in file: %s at line: %d with message: %s", path.toString(), currentLinePosition, e.getMessage()));
             }
