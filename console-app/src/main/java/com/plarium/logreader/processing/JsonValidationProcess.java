@@ -20,30 +20,30 @@ public class JsonValidationProcess implements Process<List<String>, ArrayNode> {
 
     private final Path path;
 
-    private final int linesCounter;
+    private final int startLinePosition;
 
-    public JsonValidationProcess(Path path, int linesCounter) {
+    public JsonValidationProcess(Path path, int startLinePosition) {
         this.path = path;
-        this.linesCounter = linesCounter;
+        this.startLinePosition = startLinePosition;
     }
 
     @Override
     public ArrayNode process(List<String> input) {
         ArrayNode validatedLines = mapper.createArrayNode();
-        //todo pass emtpy rows and normal line exception
-        int rowNumber = 1;
+        int currentLinePosition = startLinePosition;
         for (String line : input) {
             try {
+                if (line.isEmpty()) continue;
                 JsonNode jsonObjectLine = mapper.readTree(line);
                 JsonNode objectType = jsonObjectLine.get(LOG_TYPE_STRING);
                 if (objectType == null || objectType == NullNode.getInstance() || objectType.textValue().isEmpty()) {
-                    logger.severe(String.format("Log object has no object type at file: %s at line: %d", path.toString(), linesCounter));
+                    logger.severe(String.format("Log object has no object type at file: %s at line: %d", path.toString(), currentLinePosition));
                     continue;
                 }
                 validatedLines.add(jsonObjectLine);
-                rowNumber++;
+                currentLinePosition++;
             } catch (JsonProcessingException e) {
-                logger.severe(String.format("Invalid json object in file: %s at line: %d with message: %s", path.toString(), linesCounter, e.getMessage()));
+                logger.severe(String.format("Invalid json object in file: %s at line: %d with message: %s", path.toString(), currentLinePosition, e.getMessage()));
             }
         }
         return validatedLines;

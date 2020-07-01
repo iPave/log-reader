@@ -47,7 +47,7 @@ public class TransformService implements Runnable {
                     boolean processResult = true;
                     while (scanner.hasNextLine()) {
                         if (linesCounter != 0 & linesCounter % batchSize == 0) {
-                            processResult &= process(batch, path, apiUrl, linesCounter);
+                            processResult &= process(batch, path, apiUrl, batchSize, linesCounter);
                             batch.clear();
                         }
                         String line = scanner.nextLine();
@@ -56,7 +56,7 @@ public class TransformService implements Runnable {
                         linesCounter++;
                     }
                     // process logs at the end of file if size is less than batchSize
-                    processResult &= process(batch, path, apiUrl, linesCounter);
+                    processResult &= process(batch, path, apiUrl, batchSize, linesCounter);
                     // if any batch of file failed we put file back to queue for reprocessing, web service is idempotent
                     if (!processResult) {
                         newFilesQueue.put(path);
@@ -95,12 +95,13 @@ public class TransformService implements Runnable {
      * @param batch        Batch of log lines
      * @param path         path of file being processed
      * @param apiUrl       url of web service to be sent at
+     * @param batchSize    batch size
      * @param linesCounter line number
      * @return result of processing a batch
      */
-    private boolean process(List<String> batch, Path path, String apiUrl, int linesCounter) {
+    private boolean process(List<String> batch, Path path, String apiUrl, int batchSize, int linesCounter) {
         try {
-            return (Boolean) Chain.createStart(new JsonValidationProcess(path, linesCounter))
+            return (Boolean) Chain.createStart(new JsonValidationProcess(path, linesCounter - batchSize))
                     .append(new SendingProcess(apiUrl))
                     .start(batch);
         } catch (Exception e) {
