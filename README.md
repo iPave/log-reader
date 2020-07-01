@@ -3,7 +3,7 @@
 ## Get Started
 
 To get started you should have Docker installed and Maven. This docker compose project includes two maven modules (console 
-client and api) in two containers, connected by network. For settings - change console.env config file.
+client and api) in two containers, connected with network. For settings - change console.env config file.
 Clone the repo and cd into it, then do: 
 
 ```bash
