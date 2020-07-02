@@ -11,4 +11,4 @@ mvn clean package
 docker-compose up -d
 ``` 
 
-There are two directories mounted to your local storage: observed_dir and output_dir. Chown this two folders with your user:user_group. Put logs to ./observed_dir, the processed output log will appear at ./output_dir
+There are two directories mounted to your local storage: observed_dir and output_dir. Chmod for this two folders to be write with any user. Put logs to ./observed_dir, the processed output log will appear at ./output_dir
